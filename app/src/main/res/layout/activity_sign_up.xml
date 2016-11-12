@@ -23,7 +23,7 @@
         android:layout_centerHorizontal="true" />
 
     <Button
-        android:text="Button"
+        android:text="@string/signup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
@@ -93,4 +93,5 @@
                 android:textColor="@color/aText" />
         </LinearLayout>
     </LinearLayout>
+
 </RelativeLayout>
