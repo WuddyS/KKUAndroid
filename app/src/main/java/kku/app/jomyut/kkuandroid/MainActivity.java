@@ -9,10 +9,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.okhttp.Request;
 import com.squareup.okhttp.Response;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -79,6 +83,9 @@ public class MainActivity extends AppCompatActivity {
     private class SynUser extends AsyncTask<String, Void, String> {
         //Explicit
         private Context context;
+        private String[] nameStrings,phoneStrings, imageStrings;
+        private String truePassword;
+        private boolean aBoolean = true;
 
         public SynUser(Context context) {
             this.context = context;
@@ -98,12 +105,70 @@ public class MainActivity extends AppCompatActivity {
                 Log.d("13novV1", "e doIn ==>" + e.toString());
                 return null;
             }
-
         }   //doInBack
 
         @Override
         protected void onPostExecute(String s) {
             super.onPostExecute(s);
+
+            Log.d("13novV1", "JSON ==>" + s);
+
+            try {
+                JSONArray jsonArray = new JSONArray(s);
+
+                nameStrings = new String[jsonArray.length()];
+                phoneStrings = new String[jsonArray.length()];
+                imageStrings = new String[jsonArray.length()];
+
+                for (int i=0;i<jsonArray.length();i++) {
+
+                    JSONObject jsonObject = jsonArray.getJSONObject(i);
+
+                    nameStrings[i] = jsonObject.getString("Name");
+                    phoneStrings[i] = jsonObject.getString("Phone");
+                    imageStrings[i] = jsonObject.getString("Image");
+
+                    Log.d("13novV3", "Name(" + i + ") ==>" + nameStrings[i]);
+
+                    //Check User
+                    if (userString.equals(jsonObject.getString("User"))) {
+                        aBoolean = false;
+                        truePassword = jsonObject.getString("Password");
+                    }
+
+                }   //for
+
+                if (aBoolean) {
+                    //User False
+                    MyAlert myAlert = new MyAlert(context, R.drawable.kon48,
+                            getResources().getString(R.string.title_UserFalse),
+                            getResources().getString(R.string.message_userFalse));
+                    myAlert.myDiaLog();
+
+                } else if (passwordString.equals(truePassword)) {
+                    //Password true
+                    Toast.makeText(context, "Welcome", Toast.LENGTH_SHORT).show();
+
+                    Intent intent = new Intent(MainActivity.this, ServiceActivity.class);
+                    intent.putExtra("Name", nameStrings);
+                    intent.putExtra("Phone", phoneStrings);
+                    intent.putExtra("Image", imageStrings);
+                    startActivity(intent);
+                    finish();
+
+                } else {
+                    //Password False
+                    MyAlert myAlert = new MyAlert(context, R.drawable.rat48,
+                            getResources().getString(R.string.title_PasswordFalse),
+                            getResources().getString(R.string.message_PasswordFalse));
+                    myAlert.myDiaLog();
+
+                }
+
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
 
         }
     }   //SynUser
