@@ -1,10 +1,12 @@
 package kku.app.jomyut.kkuandroid;
 
+import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
@@ -14,6 +16,10 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
+
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.*;
 
 import org.jibble.simpleftp.SimpleFTP;
 
@@ -28,6 +34,8 @@ public class SignUpActivity extends AppCompatActivity {
     private String nameString, phoneString, userString, passwordString, imagePathString, imageNameString;
     private Uri  uri;
     private Boolean aBoolean = true;
+    private String urlAddUser = "http://swiftcodingthai.com/kku/add_user_wuddys.php";
+    private String urlImage = "http://swiftcodingthai.com/kku/Image";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +77,7 @@ public class SignUpActivity extends AppCompatActivity {
 
                     //Choose Image OK
                     upLoadImageToServer();
+                    upLoadStringToServer();
                 }
 
 
@@ -87,11 +96,74 @@ public class SignUpActivity extends AppCompatActivity {
 
     } //Main Method
 
+    private void upLoadStringToServer() {
+
+        AddNewUser addNewUser = new AddNewUser(SignUpActivity.this);
+        addNewUser.execute(urlAddUser);
+    }   //Upload
+
+    //Create Inner Class
+    private class AddNewUser extends AsyncTask<String, Void, String> {
+
+        //Explicit
+        private Context context;
+
+        public AddNewUser(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        protected String doInBackground(String... params) {
+
+            try {
+
+                OkHttpClient okHttpClient = new OkHttpClient();
+                RequestBody requestBody = new FormEncodingBuilder()
+                        .add("isAdd", "true")
+                        .add("Name", nameString)
+                        .add("Phone", phoneString)
+                        .add("User", userString)
+                        .add("Password", passwordString)
+                        .add("Image", urlImage + imageNameString)
+                        .build();
+                Request.Builder builder = new Request.Builder();
+                Request request = builder.url(params[0]).post(requestBody).build();
+                Response response = okHttpClient.newCall(request).execute();
+                return response.body().string();
+
+            } catch (Exception e) {
+                Log.d("13novV1", "e doIn ==>" + e.toString());
+            }
+
+
+            return null;
+        }   //doInbackground
+
+        @Override
+        protected void onPostExecute(String s) {
+            super.onPostExecute(s);
+
+            Log.d("13nov", "Result ==> " + s);
+
+            if (Boolean.parseBoolean(s)) {
+                Toast.makeText(context, "Uplaod Succes", Toast.LENGTH_SHORT).show();
+                finish();
+            } else {
+                Toast.makeText(context, "Cannot Upload", Toast.LENGTH_SHORT).show();
+            }
+
+
+        }   //onPost
+    }   //Add New User
+
+
     private void upLoadImageToServer() {
 
         //Change Policy
         StrictMode.ThreadPolicy threadPolicy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
         StrictMode.setThreadPolicy(threadPolicy);
+
+
 
         try {
 
@@ -113,6 +185,8 @@ public class SignUpActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if ((requestCode == 0) && (resultCode == RESULT_OK)) {
+
+            aBoolean = false;
 
             Log.d("12novV1", "Result OK");
 
