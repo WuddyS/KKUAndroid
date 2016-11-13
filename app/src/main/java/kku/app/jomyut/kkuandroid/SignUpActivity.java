@@ -34,7 +34,7 @@ public class SignUpActivity extends AppCompatActivity {
     private String nameString, phoneString, userString, passwordString, imagePathString, imageNameString;
     private Uri  uri;
     private Boolean aBoolean = true;
-    private String urlAddUser = "http://swiftcodingthai.com/kku/add_user_wuddys.php";
+    private String urlAddUser = "http://swiftcodingthai.com/kku/add_user_master.php";
     private String urlImage = "http://swiftcodingthai.com/kku/Image";
 
     @Override
